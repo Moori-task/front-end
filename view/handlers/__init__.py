@@ -1,2 +1,3 @@
-from .automatic_search import AutomaticSearchView
-from .start import start_handler
+from .abstract_handler import AbstractHandler
+from .start import StartHandler
+from .automatic_search import AutomaticSearchHandler
