@@ -15,8 +15,7 @@ CAPACITY, RATE, AREA = range(3)
 
 
 class AutomaticSearchHandler(AbstractHandler):
-    def __init__(self, command: str):
-        super().__init__(command)
+    def __init__(self):
         self.capacity = 0
         self.min_rate = 0
         self.area_range = (0, 0)
@@ -24,9 +23,9 @@ class AutomaticSearchHandler(AbstractHandler):
     def __str__(self) -> str:
         return f"capacity: {self.capacity}, rate: {self.rate}, area: {str(self.area_range)}"
 
-    def get_handler(self) -> "BaseHandler":
+    def get_handler(self, command: str) -> "BaseHandler":
         return ConversationHandler(
-            entry_points=[CommandHandler(self.command, self.handle_start)],
+            entry_points=[CommandHandler(command, self.handle_start)],
             states={
                 CAPACITY: [
                     MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_capacity)

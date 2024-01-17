@@ -9,11 +9,8 @@ from view.handlers.abstract_handler import AbstractHandler
 
 
 class StartHandler(AbstractHandler):
-    def __init__(self, command: str):
-        super().__init__(command)
-
-    def get_handler(self) -> BaseHandler:
-        return CommandHandler("start", self.handle_start)
+    def get_handler(self, command: str) -> BaseHandler:
+        return CommandHandler(command, self.handle_start)
 
     async def handle_start(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
