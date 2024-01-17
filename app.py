@@ -64,6 +64,8 @@ def set_webhook():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    bot.get_updates(Update.ALL_TYPES)
+    # bot.send_message(chat_id='69887066', text='hi')
     return "."
 
 
