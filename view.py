@@ -31,4 +31,4 @@ app = ApplicationBuilder().token(bot_token).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(AutomaticSearchView().get_handler())
 
-app.run_polling(poll_interval=0.5)
+app.run_polling()
