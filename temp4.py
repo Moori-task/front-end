@@ -10,6 +10,6 @@ async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 app = ApplicationBuilder().token(bot_token).build()
 
-app.add_handler(CommandHandler("/start", hello))
+app.add_handler(CommandHandler("start", hello))
 
 app.run_polling()
