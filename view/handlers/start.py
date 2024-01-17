@@ -5,6 +5,6 @@ from telegram.ext import (
 )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f"Hi. How can I search for you?")
+    await update.message.reply_text(f"سلام. \n چطور می‌تونم کمکتون کنم؟ ")
 
 start_handler = CommandHandler("start", start)

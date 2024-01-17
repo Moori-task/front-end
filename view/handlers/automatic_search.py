@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-from re import U
-from typing import Tuple
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import (
     BaseHandler,
