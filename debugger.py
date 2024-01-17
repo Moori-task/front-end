@@ -15,3 +15,5 @@ class Debugger(metaclass=Singleton):
 
     def get_logger(self):
         return self.logger
+    
+Debugger()
