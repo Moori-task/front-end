@@ -8,6 +8,8 @@ from telegram.ext import (
     filters,
 )
 
+from debugger import Debugger
+
 CAPACITY, RATE, AREA = range(3)
 
 class AutomaticSearchView:
@@ -47,13 +49,13 @@ class AutomaticSearchView:
     ) -> int:
         """Cancels and ends the conversation."""
         user = update.message.from_user
-        # logger.info("User %s canceled the conversation.", user.first_name)
+        Debugger().get_logger().info("User %s canceled the conversation.", user.first_name)
         await update.message.reply_text(
             "عملیات لغو شد", 
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
-    
+
     def get_handler(self) -> "BaseHandler":
         return ConversationHandler(
             entry_points=[CommandHandler("search_automatic", self.handle_start)],
@@ -61,6 +63,7 @@ class AutomaticSearchView:
                 CAPACITY: [MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_capacity)],
                 # you should include 0 in rate, too
                 RATE: [MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_rate)],
+                # this should be a regex of range. for example, "1-125"
                 AREA: [MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_area)],
             },
             fallbacks=[CommandHandler("cancel", self.handle_cancel)],
