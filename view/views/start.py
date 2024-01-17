@@ -5,10 +5,10 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from view.handlers.abstract_handler import AbstractHandler
+from .abstract_view import AbstractView
 
 
-class StartHandler(AbstractHandler):
+class StartView(AbstractView):
     def get_handler(self, command: str) -> BaseHandler:
         return CommandHandler(command, self.handle_start)
 

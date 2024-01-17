@@ -9,12 +9,12 @@ from telegram.ext import (
 )
 
 from debugger import Debugger
-from .abstract_handler import AbstractHandler
+from .abstract_view import AbstractView
 
 CAPACITY, RATE, AREA = range(3)
 
 
-class AutomaticSearchHandler(AbstractHandler):
+class AutomaticSearchView(AbstractView):
     def __init__(self):
         self.capacity = 0
         self.min_rate = 0

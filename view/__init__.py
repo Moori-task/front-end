@@ -1,1 +1,1 @@
-from .main_view import MainView
+from .config import ViewConfig

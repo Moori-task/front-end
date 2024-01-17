@@ -1,3 +1,3 @@
-from view import MainView
+from view import ViewConfig
 
-MainView().run()
+ViewConfig().run()
