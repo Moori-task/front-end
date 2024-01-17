@@ -7,4 +7,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-ENTRYPOINT ["python3", "view.py"]
+ENTRYPOINT ["python3", "view2.py"]
