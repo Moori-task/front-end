@@ -146,14 +146,13 @@ def main() -> None:
         entry_points=[CommandHandler("start", start)],
         states={
             GENDER: [MessageHandler(filters.Regex("^(Boy|Girl|Other)$"), gender)],
-            PHOTO: [MessageHandler(filters.PHOTO, photo), CommandHandler("skip", skip_photo)],
+            PHOTO: [MessageHandler(filters.PHOTO, photo)],
             LOCATION: [
                 MessageHandler(filters.LOCATION, location),
-                CommandHandler("skip", skip_location),
             ],
             BIO: [MessageHandler(filters.TEXT & ~filters.COMMAND, bio)],
         },
-        fallbacks=[CommandHandler("cancel", cancel)],
+        fallbacks=[],
     )
 
     application.add_handler(conv_handler)
