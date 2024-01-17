@@ -9,6 +9,16 @@ from telegram.ext import (
 )
 from credentials import bot_token
 
+import logging
+
+# Enable logging
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+# set higher logging level for httpx to avoid all GET and POST requests being logged
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f"Hi. How can I search for you?")
@@ -52,9 +62,11 @@ async def automatic_search_cancel(
 ) -> int:
     """Cancels and ends the conversation."""
     user = update.message.from_user
-    # logger.info("User %s canceled the conversation.", user.first_name)
+    logger.info("User %s canceled the conversation.", user.first_name)
     await update.message.reply_text(
-        "عملیات لغو شد", reply_markup=ReplyKeyboardRemove()
+        "عملیات لغو شد", 
+        reply_markup=ReplyKeyboardRemove()
+    )
     return ConversationHandler.END
 
 automatic_search_handler = ConversationHandler(
@@ -65,13 +77,12 @@ automatic_search_handler = ConversationHandler(
         RATE: [MessageHandler(filters.Regex("^[1-9][0-9]*$"), automatic_search_rate)],
         AREA: [MessageHandler(filters.Regex("^[1-9][0-9]*$"), automatic_search_area)],
     },
-    fallbacks=[CommandHandler("cancel", cancel)],
+    fallbacks=[CommandHandler("cancel", automatic_search_cancel)],
 )
-
 
 app = ApplicationBuilder().token(bot_token).build()
 
 app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("search_automatic", automatic_search_handler))
+app.add_handler(automatic_search_handler)
 
-app.run_polling()
+app.run_polling(poll_interval=0.5)
