@@ -13,17 +13,15 @@ import httpx
 from debugger import Debugger
 from .abstract_view import AbstractView
 
-CAPACITY, RATE, AREA = range(3)
+CAPACITY, RATE, AREA_MIN, AREA_MAX = range(4)
 
 # TODO: Separate data from presentation
 class AutomaticSearchView(AbstractView):
     def __init__(self):
         self.capacity = 0
         self.rate__gte = 0
-        self.area_range = (0, 0)
-
-    def __str__(self) -> str:
-        return f"capacity: {self.capacity}, rate: {self.rate__gte}, area: {str(self.area_range)}"
+        self.area__lte = 0
+        self.area__gte = 0
 
     def get_handler(self, command: str) -> "BaseHandler":
         return ConversationHandler(
@@ -37,8 +35,11 @@ class AutomaticSearchView(AbstractView):
                     MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_rate)
                 ],
                 # this should be a regex of range. for example, "1-125"
-                AREA: [
-                    MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_area)
+                AREA_MIN: [
+                    MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_area_min)
+                ],
+                AREA_MAX: [
+                    MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_area_max)
                 ],
             },
             fallbacks=[CommandHandler("cancel", self.handle_cancel)],
@@ -67,13 +68,20 @@ class AutomaticSearchView(AbstractView):
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         self.rate__gte = int(update.message.text)
-        await update.message.reply_text("خانه بین چند متر باید باشد؟")
-        return AREA
+        await update.message.reply_text("خانه حداقل چند متر باید باشد؟")
+        return AREA_MIN
 
-    async def handle_area(
+    async def handle_area_min(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        self.area_range = (int(update.message.text), int(update.message.text) + 1)
+        self.area__lte = int(update.message.text)
+        await update.message.reply_text("خانه حداکثر چند متر باید باشد؟")
+        return AREA_MAX
+    
+    async def handle_area_max(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> int:
+        self.area__gte = int(update.message.text)
 
         places = await self.get_places()
         await update.message.reply_text("خدمت شما!\n" + str(places))
@@ -82,7 +90,7 @@ class AutomaticSearchView(AbstractView):
     async def get_places(self):
         base_url = 'http://127.0.0.1:8080/'
         get_places_offset = 'api/place/get/'
-        params = {'capacity': self.capacity, 'rate__gte': self.rate__gte}
+        params = self.__dict__
         with httpx.Client() as client:
             response = client.get(url=base_url + get_places_offset, params=params)
         return response.content
