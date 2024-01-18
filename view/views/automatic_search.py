@@ -1,3 +1,4 @@
+from typing import List
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import (
     BaseHandler,
@@ -7,6 +8,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+import requests
 
 from debugger import Debugger
 from .abstract_view import AbstractView
@@ -72,8 +74,18 @@ class AutomaticSearchView(AbstractView):
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         self.area_range = (int(update.message.text), int(update.message.text) + 1)
-        await update.message.reply_text("خدمت شما!\n" + str(self))
+
+        places = await self.get_places()
+        await update.message.reply_text("خدمت شما!\n" + str(places))
         return ConversationHandler.END
+    
+    async def get_places(self):
+        base_url = '127.0.0.1:8080/'
+        get_places_offset = 'api/place/get/'
+        params = {'rate': self.min_rate, 'capacity': self.capacity, 'area_size': self.area_range}
+        response = requests.get(base_url + get_places_offset, params=params)
+        return response.content
+
 
     async def handle_cancel(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
