@@ -19,11 +19,11 @@ CAPACITY, RATE, AREA = range(3)
 class AutomaticSearchView(AbstractView):
     def __init__(self):
         self.capacity = 0
-        self.min_rate = 0
+        self.rate__gte = 0
         self.area_range = (0, 0)
 
     def __str__(self) -> str:
-        return f"capacity: {self.capacity}, rate: {self.rate}, area: {str(self.area_range)}"
+        return f"capacity: {self.capacity}, rate: {self.rate__gte}, area: {str(self.area_range)}"
 
     def get_handler(self, command: str) -> "BaseHandler":
         return ConversationHandler(
@@ -66,7 +66,7 @@ class AutomaticSearchView(AbstractView):
     async def handle_rate(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        self.rate = int(update.message.text)
+        self.rate__gte = int(update.message.text)
         await update.message.reply_text("خانه بین چند متر باید باشد؟")
         return AREA
 
@@ -82,7 +82,7 @@ class AutomaticSearchView(AbstractView):
     async def get_places(self):
         base_url = 'http://127.0.0.1:8080/'
         get_places_offset = 'api/place/get/'
-        params = {'rate': self.min_rate, 'capacity': self.capacity, 'area_size': self.area_range}
+        params = {'capacity': self.capacity, 'rate__gte': self.rate__gte}
         with httpx.Client() as client:
             response = client.get(url=base_url + get_places_offset, params=params)
         return response.content

@@ -1,8 +1,8 @@
 from typing import Dict, List
 from telegram.ext import ApplicationBuilder
-from .credentials import bot_token
+from credentials import bot_token
 
-from .views import AbstractView, AutomaticSearchView, StartView
+from views import AbstractView, AutomaticSearchView, StartView
 
 
 class ViewConfig:
