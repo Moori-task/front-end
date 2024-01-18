@@ -1,3 +1,4 @@
+import json
 from typing import List
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import (
@@ -12,16 +13,47 @@ import httpx
 
 from debugger import Debugger
 from .abstract_view import AbstractView
+import pprint
 
-CAPACITY, RATE, AREA_MIN, AREA_MAX = range(4)
-
-# TODO: Separate data from presentation
-class AutomaticSearchView(AbstractView):
+class AutomaticSearchController:
     def __init__(self):
         self.capacity = 0
         self.rate__gte = 0
         self.area__lte = 0
         self.area__gte = 0
+
+    def set_capacity(self, capacity):
+        self.capacity = capacity
+    
+    def set_min_rate(self, min_rate):
+        self.rate__gte = min_rate
+    
+    def set_min_area_size(self, min_area_size):
+        self.area__gte = min_area_size
+    def set_max_area_size(self, max_area_size):
+        self.area__lte = max_area_size
+
+    base_url = 'http://127.0.0.1:8080/'
+    get_places_offset = 'api/place/get/'
+
+    def get_params(self):
+        return self.__dict__
+    
+    @classmethod
+    def parse_json_bytes(cls, b):
+        parsed = b.decode("utf-8")
+        return json.loads(parsed)
+
+    def get_places(self) -> List:
+        with httpx.Client() as client:
+            response = client.get(url=self.base_url + self.get_places_offset, params=self.get_params())
+        return self.parse_json_bytes(response.content)
+
+CAPACITY, RATE, AREA_MIN, AREA_MAX = range(4)
+
+class AutomaticSearchView(AbstractView):
+    def __init__(self):
+        self.controller = AutomaticSearchController()
 
     def get_handler(self, command: str) -> "BaseHandler":
         return ConversationHandler(
@@ -58,7 +90,7 @@ class AutomaticSearchView(AbstractView):
     async def handle_capacity(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        self.capacity = int(update.message.text)
+        self.controller.set_capacity(int(update.message.text))
         await update.message.reply_text(
             "امتیاز اقامتگاه از چند به بالا باشد مناسب است؟"
         )
@@ -67,33 +99,27 @@ class AutomaticSearchView(AbstractView):
     async def handle_rate(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        self.rate__gte = int(update.message.text)
+        self.controller.set_min_rate(int(update.message.text))
         await update.message.reply_text("خانه حداقل چند متر باید باشد؟")
         return AREA_MIN
 
     async def handle_area_min(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        self.area__lte = int(update.message.text)
+        self.controller.set_min_area_size(int(update.message.text))
         await update.message.reply_text("خانه حداکثر چند متر باید باشد؟")
         return AREA_MAX
+    
+    def make_pretty(self, item) -> str:
+        return pprint.pformat(item)
     
     async def handle_area_max(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        self.area__gte = int(update.message.text)
-
-        places = await self.get_places()
-        await update.message.reply_text("خدمت شما!\n" + str(places))
+        self.controller.set_max_area_size(int(update.message.text))
+        places = self.controller.get_places()
+        await update.message.reply_text("خدمت شما!\n" + self.make_pretty(places))
         return ConversationHandler.END
-    
-    async def get_places(self):
-        base_url = 'http://127.0.0.1:8080/'
-        get_places_offset = 'api/place/get/'
-        params = self.__dict__
-        with httpx.Client() as client:
-            response = client.get(url=base_url + get_places_offset, params=params)
-        return response.content
 
 
     async def handle_cancel(
