@@ -13,7 +13,7 @@ from .abstract_view import AbstractView
 
 CAPACITY, RATE, AREA = range(3)
 
-
+# TODO: Separate data from presentation
 class AutomaticSearchView(AbstractView):
     def __init__(self):
         self.capacity = 0
