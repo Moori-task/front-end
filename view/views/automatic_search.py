@@ -8,7 +8,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-import requests
+import httpx
 
 from debugger import Debugger
 from .abstract_view import AbstractView
@@ -80,10 +80,11 @@ class AutomaticSearchView(AbstractView):
         return ConversationHandler.END
     
     async def get_places(self):
-        base_url = '127.0.0.1:8080/'
+        base_url = 'http://127.0.0.1:8080/'
         get_places_offset = 'api/place/get/'
         params = {'rate': self.min_rate, 'capacity': self.capacity, 'area_size': self.area_range}
-        response = requests.get(base_url + get_places_offset, params=params)
+        with httpx.Client() as client:
+            response = client.get(url=base_url + get_places_offset, params=params)
         return response.content
 
 
