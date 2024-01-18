@@ -1,5 +1,5 @@
 import logging
-from singleton import Singleton
+from utility.singleton import Singleton
 
 
 class Debugger(metaclass=Singleton):
