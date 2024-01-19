@@ -15,30 +15,40 @@ from debugger import Debugger
 from .abstract_view import AbstractView
 import pprint
 
+
 class AutomaticSearchController:
     def __init__(self):
         self.capacity = 0
         self.rate__gte = 0
         self.area__lte = 0
         self.area__gte = 0
+        self.reserve_date_before = ""
+        self.reserve_date_after = ""
 
     def set_capacity(self, capacity):
         self.capacity = capacity
-    
+
     def set_min_rate(self, min_rate):
         self.rate__gte = min_rate
-    
+
     def set_min_area_size(self, min_area_size):
         self.area__gte = min_area_size
+
     def set_max_area_size(self, max_area_size):
         self.area__lte = max_area_size
 
-    base_url = 'http://127.0.0.1:8080/'
-    get_places_offset = 'api/place/get/'
+    def set_min_reserve_date(self, min_reserve_date):
+        self.reserve_date_after = min_reserve_date
+
+    def set_max_reserve_date(self, max_reserve_date):
+        self.reserve_date_before = max_reserve_date
+
+    base_url = "http://127.0.0.1:8080/"
+    get_places_offset = "api/place/get/"
 
     def get_params(self):
         return self.__dict__
-    
+
     @classmethod
     def parse_json_bytes(cls, b):
         parsed = b.decode("utf-8")
@@ -46,10 +56,14 @@ class AutomaticSearchController:
 
     def get_places(self) -> List:
         with httpx.Client() as client:
-            response = client.get(url=self.base_url + self.get_places_offset, params=self.get_params())
+            response = client.get(
+                url=self.base_url + self.get_places_offset, params=self.get_params()
+            )
         return self.parse_json_bytes(response.content)
 
+
 CAPACITY, RATE, AREA_MIN, AREA_MAX = range(4)
+
 
 class AutomaticSearchView(AbstractView):
     def __init__(self):
@@ -109,10 +123,10 @@ class AutomaticSearchView(AbstractView):
         self.controller.set_min_area_size(int(update.message.text))
         await update.message.reply_text("خانه حداکثر چند متر باید باشد؟")
         return AREA_MAX
-    
+
     def make_pretty(self, item) -> str:
         return pprint.pformat(item)
-    
+
     async def handle_area_max(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
@@ -120,7 +134,6 @@ class AutomaticSearchView(AbstractView):
         places = self.controller.get_places()
         await update.message.reply_text("خدمت شما!\n" + self.make_pretty(places))
         return ConversationHandler.END
-
 
     async def handle_cancel(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
