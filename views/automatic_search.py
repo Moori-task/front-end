@@ -62,7 +62,14 @@ class AutomaticSearchController:
         return self.parse_json_bytes(response.content)
 
 
-CAPACITY, RATE, AREA_MIN, AREA_MAX = range(4)
+from enum import Enum, auto, unique
+
+@unique
+class AutomaticSearchMenuState(Enum):
+    CAPACITY = auto()
+    RATE = auto()
+    AREA_MIN = auto()
+    AREA_MAX = auto()
 
 
 class AutomaticSearchView(AbstractView):
@@ -73,18 +80,18 @@ class AutomaticSearchView(AbstractView):
         return ConversationHandler(
             entry_points=[CommandHandler(command, self.handle_start)],
             states={
-                CAPACITY: [
+                AutomaticSearchMenuState.CAPACITY: [
                     MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_capacity)
                 ],
                 # you should include 0 in rate, too
-                RATE: [
+                AutomaticSearchMenuState.RATE: [
                     MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_rate)
                 ],
                 # this should be a regex of range. for example, "1-125"
-                AREA_MIN: [
+                AutomaticSearchMenuState.AREA_MIN: [
                     MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_area_min)
                 ],
-                AREA_MAX: [
+                AutomaticSearchMenuState.AREA_MAX: [
                     MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle_area_max)
                 ],
             },
@@ -99,7 +106,7 @@ class AutomaticSearchView(AbstractView):
             "در هر زمان، برای لغو این عملیات از دستور /cancel استفاده کنید.\n"
             "اقامتگاه شما باید چند نفر ظرفیت داشته‌باشد؟",
         )
-        return CAPACITY
+        return AutomaticSearchMenuState.CAPACITY
 
     async def handle_capacity(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -108,21 +115,21 @@ class AutomaticSearchView(AbstractView):
         await update.message.reply_text(
             "امتیاز اقامتگاه از چند به بالا باشد مناسب است؟"
         )
-        return RATE
+        return AutomaticSearchMenuState.RATE
 
     async def handle_rate(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         self.controller.set_min_rate(int(update.message.text))
         await update.message.reply_text("خانه حداقل چند متر باید باشد؟")
-        return AREA_MIN
+        return AutomaticSearchMenuState.AREA_MIN
 
     async def handle_area_min(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
         self.controller.set_min_area_size(int(update.message.text))
         await update.message.reply_text("خانه حداکثر چند متر باید باشد؟")
-        return AREA_MAX
+        return AutomaticSearchMenuState.AREA_MAX
 
     def make_pretty(self, item) -> str:
         return pprint.pformat(item)
