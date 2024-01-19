@@ -69,9 +69,36 @@ class AreaMaxState(SingleTransitionState):
         await update.message.reply_text("خانه حداقل چند متر باید باشد؟")
 
     class Transition(StateTransition):
-        def next_state(self):
-            return AreaMaxState(self.controller)
+        def get_handler(self):
+            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+        
+        def next_state(self) -> "TraversingState":
+            return ReserveMinDateState(self.controller)
+        
+        async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+            self.controller.set_max_area_size(int(update.message.text))
 
+class ReserveMinDateState(SingleTransitionState):
+    id = 4
+    async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text("از چه تاریخی می‌خواهید رزرو انجام دهید؟")
+
+    class Transition(StateTransition):
+        def get_handler(self):
+            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+        
+        def next_state(self) -> "TraversingState":
+            return ReserveMaxDateState(self.controller)
+        
+        async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+            self.controller.set_min_reserve_date(str(update.message.text))
+
+class ReserveMaxDateState(SingleTransitionState):
+    id = 5
+    async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text("تا چه تاریخی می‌خواهید رزرو انجام دهید؟")
+
+    class Transition(StateTransition):
         def get_handler(self):
             return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
 
@@ -79,15 +106,16 @@ class AreaMaxState(SingleTransitionState):
             return pprint.pformat(item)
         
         async def handle(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-            self.controller.set_max_area_size(int(update.message.text))
+            self.controller.set_max_reserve_date(str(update.message.text))
             places = self.controller.get_places()
             await update.message.reply_text("خدمت شما!\n" + self.make_pretty(places))
             return ConversationHandler.END
         
         # TODO refused bequest
+        def next_state(self) -> "TraversingState":
+            return super().next_state()
         async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
             return await super().run(update, context)
-        
 
 
 class StartTransition(StateTransition):

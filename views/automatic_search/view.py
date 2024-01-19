@@ -5,9 +5,19 @@ from telegram.ext import (
 )
 
 from .menu_state_abstracts import StateTransition, TraversingState
-from .menu_states import AreaMaxState, AreaMinState, CancelTransition, CapacityState, RateState, StartTransition
+from .menu_states import (
+    AreaMaxState,
+    AreaMinState,
+    CancelTransition,
+    CapacityState,
+    RateState,
+    ReserveMaxDateState,
+    ReserveMinDateState,
+    StartTransition,
+)
 from ..abstract_view import AbstractView
 from .controller import AutomaticSearchController
+
 
 class AutomaticSearchView(AbstractView):
     def __init__(self):
@@ -16,7 +26,7 @@ class AutomaticSearchView(AbstractView):
     def get_handler(self, command: str) -> "BaseHandler":
         def transform_handlers(handlers: List[StateTransition]):
             return list(map(lambda transition: transition.get_handler(), handlers))
-            
+
         start_transitions: List["StateTransition"] = [StartTransition(self.controller)]
         entry_points = transform_handlers(start_transitions)
 
@@ -25,16 +35,19 @@ class AutomaticSearchView(AbstractView):
             RateState(self.controller),
             AreaMinState(self.controller),
             AreaMaxState(self.controller),
+            ReserveMinDateState(self.controller),
+            ReserveMaxDateState(self.controller),
         ]
         # TODO replace loops with pipelines
-        # TODO state_id
         states = {}
         for menu_state in menu_states:
             states[menu_state.id] = transform_handlers(menu_state.get_handlers())
 
-        cancel_transitions: List["StateTransition"] = [CancelTransition(self.controller)]
-        fallbacks=transform_handlers(cancel_transitions)
-        
+        cancel_transitions: List["StateTransition"] = [
+            CancelTransition(self.controller)
+        ]
+        fallbacks = transform_handlers(cancel_transitions)
+
         # TODO watch over fallback types
         return ConversationHandler(
             entry_points=entry_points,
