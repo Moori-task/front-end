@@ -1,4 +1,5 @@
 from debugger import Debugger
+from views.automatic_search_abstracts import TraversingState
 from .automatic_search_abstracts import SingleTransitionState, StateTransition
 
 from typing import List, Type
@@ -81,6 +82,10 @@ class AreaMaxState(SingleTransitionState):
             await update.message.reply_text("خدمت شما!\n" + self.make_pretty(places))
             return ConversationHandler.END
         
+        # TODO refused bequest
+        async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+            return await super().run(update, context)
+        
 
 
 class StartTransition(StateTransition):
@@ -110,3 +115,11 @@ class CancelTransition(StateTransition):
             "عملیات لغو شد", reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
+    
+
+    # TODO: handle refused bequest
+    async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        return await super().run(update, context)
+    
+    def next_state(self) -> TraversingState:
+        return super().next_state()
