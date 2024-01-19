@@ -13,6 +13,8 @@ from telegram.ext import (
 
 
 class TraversingState(ABC):
+    id: int
+
     def __init__(self, controller):
         self.controller = controller
 
@@ -37,7 +39,7 @@ class StateTransition(ABC):
         self.controller = controller
 
     @abstractmethod
-    def get_handler(self):
+    def get_handler(self) -> "BaseHandler":
         pass
 
     @abstractmethod
@@ -51,4 +53,4 @@ class StateTransition(ABC):
     async def handle(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await self.run(update, context)
         await self.next_state().run(update, context)
-        return self.next_state()
+        return self.next_state().id

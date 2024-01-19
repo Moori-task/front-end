@@ -15,6 +15,7 @@ from telegram.ext import (
 import pprint
 
 class CapacityState(SingleTransitionState):
+    id = 0
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "اقامتگاه شما باید چند نفر ظرفیت داشته‌باشد؟",
@@ -32,6 +33,7 @@ class CapacityState(SingleTransitionState):
 
 
 class RateState(SingleTransitionState):
+    id = 1
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "امتیاز اقامتگاه از چند به بالا باشد مناسب است؟"
@@ -49,6 +51,7 @@ class RateState(SingleTransitionState):
             return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
         
 class AreaMinState(SingleTransitionState):
+    id = 2
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("خانه حداقل چند متر باید باشد؟")
 
@@ -63,6 +66,7 @@ class AreaMinState(SingleTransitionState):
             return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
         
 class AreaMaxState(SingleTransitionState):
+    id = 3
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("خانه حداقل چند متر باید باشد؟")
 
@@ -90,7 +94,7 @@ class AreaMaxState(SingleTransitionState):
 
 class StartTransition(StateTransition):
     def get_handler(self):
-        return CommandHandler("start", self.handle)
+        return CommandHandler("search_automatic", self.handle)
 
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
