@@ -1,14 +1,10 @@
 from abc import ABC, abstractmethod
 
 from typing import List, Type
-from telegram import Update, ReplyKeyboardRemove
+from telegram import Update
 from telegram.ext import (
     BaseHandler,
-    CommandHandler,
     ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters,
 )
 
 
@@ -19,7 +15,7 @@ class TraversingState(ABC):
         self.controller = controller
 
     @abstractmethod
-    async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def run(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
         pass
 
     @abstractmethod
@@ -43,14 +39,14 @@ class StateTransition(ABC):
         pass
 
     @abstractmethod
-    async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def run(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
         pass
 
     @abstractmethod
     def next_state(self) -> "TraversingState":
         pass
 
-    async def handle(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def handle(self, update: "Update", context: "ContextTypes.DEFAULT_TYPE"):
         await self.run(update, context)
         await self.next_state().run(update, context)
         return self.next_state().id

@@ -1,11 +1,9 @@
 from debugger import Debugger
-from views.automatic_search_abstracts import TraversingState
-from .automatic_search_abstracts import SingleTransitionState, StateTransition
+from .menu_state_abstracts import TraversingState
+from .menu_state_abstracts import SingleTransitionState, StateTransition
 
-from typing import List, Type
 from telegram import Update, ReplyKeyboardRemove
 from telegram.ext import (
-    BaseHandler,
     CommandHandler,
     ContextTypes,
     ConversationHandler,
