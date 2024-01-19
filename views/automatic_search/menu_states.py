@@ -12,6 +12,11 @@ from telegram.ext import (
 )
 import pprint
 
+
+DATE_REGEX = r"^(19|20)\d{2}-(0[1-9]|1[1,2])-(0[1-9]|[12][0-9]|3[01])$"
+INT_REGEX = r"^[1-9][0-9]*$"
+# TODO: Obvious :)
+FLOAT_REGEX = INT_REGEX
 class CapacityState(SingleTransitionState):
     id = 0
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -27,7 +32,7 @@ class CapacityState(SingleTransitionState):
             self.controller.set_capacity(int(update.message.text))
 
         def get_handler(self):
-            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+            return MessageHandler(filters.Regex(INT_REGEX), self.handle)
 
 
 class RateState(SingleTransitionState):
@@ -46,7 +51,7 @@ class RateState(SingleTransitionState):
 
         def get_handler(self):
             # you should include 0 in rate, too
-            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+            return MessageHandler(filters.Regex(FLOAT_REGEX), self.handle)
         
 class AreaMinState(SingleTransitionState):
     id = 2
@@ -61,7 +66,7 @@ class AreaMinState(SingleTransitionState):
             self.controller.set_min_area_size(int(update.message.text))
 
         def get_handler(self):
-            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+            return MessageHandler(filters.Regex(INT_REGEX), self.handle)
         
 class AreaMaxState(SingleTransitionState):
     id = 3
@@ -70,7 +75,7 @@ class AreaMaxState(SingleTransitionState):
 
     class Transition(StateTransition):
         def get_handler(self):
-            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+            return MessageHandler(filters.Regex(INT_REGEX), self.handle)
         
         def next_state(self) -> "TraversingState":
             return ReserveMinDateState(self.controller)
@@ -85,7 +90,7 @@ class ReserveMinDateState(SingleTransitionState):
 
     class Transition(StateTransition):
         def get_handler(self):
-            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+            return MessageHandler(filters.Regex(DATE_REGEX), self.handle)
         
         def next_state(self) -> "TraversingState":
             return ReserveMaxDateState(self.controller)
@@ -100,7 +105,7 @@ class ReserveMaxDateState(SingleTransitionState):
 
     class Transition(StateTransition):
         def get_handler(self):
-            return MessageHandler(filters.Regex("^[1-9][0-9]*$"), self.handle)
+            return MessageHandler(filters.Regex(DATE_REGEX), self.handle)
 
         def make_pretty(self, item) -> str:
             return pprint.pformat(item)
